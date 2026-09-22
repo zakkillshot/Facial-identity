@@ -41,7 +41,11 @@ class Handler(BaseHTTPRequestHandler):
 
         elif self.path == "/self_test":
             try:
-                images = list((ROOT / "references").rglob("*.jpg"))
+                images = [
+                    p
+                    for p in (ROOT / "references").rglob("*")
+                    if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}
+                ]
 
                 if not images:
                     return self._send(
@@ -49,7 +53,8 @@ class Handler(BaseHTTPRequestHandler):
                         {"error": "no_reference_images_found"},
                     )
 
-                result = checker.check(images[0], "front")
+                test_image = images[0]
+                result = checker.check(test_image, "front")
 
                 self._send(
                     200,
@@ -57,7 +62,7 @@ class Handler(BaseHTTPRequestHandler):
                         "status": "ok",
                         "version": "0.7",
                         "model_loaded": True,
-                        "test_image": images[0].name,
+                        "test_image": test_image.name,
                         "result": result,
                     },
                 )
