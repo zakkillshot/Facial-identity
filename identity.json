@@ -1,0 +1,38 @@
+{
+  "identity_name": "ZAK ID",
+  "version": "1.0",
+  "source_policy": "Only genuine user-provided photographs may be identity anchors. Never promote generated images to references.",
+  "face": {
+    "primary_anchor": "references/face/01_front_neutral.jpeg",
+    "anchors": [
+      "references/face/01_front_neutral.jpeg",
+      "references/face/02_three_quarter_left.jpeg",
+      "references/face/03_three_quarter_right.jpeg",
+      "references/face/04_left_profile.jpeg",
+      "references/face/05_looking_up.jpeg"
+    ]
+  },
+  "grooming": {
+    "hair": "Dense natural curly/coily hair; preserve current natural silhouette and hairline; approximately 2 inches on top; compact sides/back; no artificial sharp fade or lineup.",
+    "facial_hair": "Natural mustache/goatee/stubble target approximately 1 mm. Face-reference beard length is NOT authoritative."
+  },
+  "body": {
+    "build": "Lean/slender",
+    "anchors": [
+      "references/body/01_elevator.jpeg",
+      "references/body/02_kitchen.jpeg",
+      "references/body/03_garage.jpeg",
+      "references/body/04_night_upper_body.jpeg",
+      "references/body/05_walker.jpeg"
+    ],
+    "mobility_rule": "Mobility references describe posture/equipment only when requested; do not automatically add wheelchair or walker."
+  },
+  "generation_rules": [
+    "Select the closest genuine face-reference angle to the requested camera angle.",
+    "Do not redesign, beautify, age, or masculinize the face.",
+    "Preserve facial geometry before style.",
+    "Do not use generated images as identity references.",
+    "Generate one candidate at a time when identity accuracy is important.",
+    "Prefer pixel-preserving edits when the source face is already correct."
+  ]
+}

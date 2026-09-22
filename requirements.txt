@@ -1,0 +1,8 @@
+Pillow>=10
+numpy>=1.26
+mcp
+
+# Real identity matching (required for PASS/REVIEW/REJECT):
+insightface>=0.7.3
+onnxruntime>=1.17
+opencv-python-headless>=4.9
