@@ -1,7 +1,7 @@
 """Memory-conscious face-embedding backend for ZAK Identity Engine v0.7.
 
 Optimized for small free-tier instances:
-- defaults to InsightFace ``buffalo_s`` instead of ``buffalo_l``
+- defaults to InsightFace ``buffalo_sc`` instead of ``buffalo_l``
 - uses CPU execution only
 - uses a 320x320 detector input
 - model initialization is deferred until the first embedding request
@@ -20,7 +20,7 @@ class BackendUnavailable(RuntimeError):
 
 class InsightFaceBackend:
     def __init__(self, model_name=None, providers=None, det_size=None):
-        self.model_name = model_name or os.getenv("ZAK_FACE_MODEL", "buffalo_s")
+        self.model_name = model_name or os.getenv("ZAK_FACE_MODEL", "buffalo_sc")
         self.providers = providers or ["CPUExecutionProvider"]
         det = det_size or os.getenv("ZAK_DET_SIZE", "320")
         try:
