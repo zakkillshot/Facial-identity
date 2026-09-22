@@ -1,4 +1,4 @@
-"""ZAK Identity Engine v0.7 HTTP service.
+"""""ZAK Identity Engine v0.7 HTTP service - self test enabled.
 
 The biometric model is lazy-loaded on the first identity-check request so the
 service can boot with a much smaller idle memory footprint.
