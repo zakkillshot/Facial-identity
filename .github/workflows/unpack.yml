@@ -1,0 +1,45 @@
+name: Unpack ZAK Identity Engine
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Unpack project into repository root
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP="ZAK_Identity_Engine_v0.6.zip"
+          TMP="$(mktemp -d)"
+
+          test -f "$ZIP"
+          unzip -q "$ZIP" -d "$TMP"
+
+          SRC="$TMP/zak_identity_engine_v05"
+          test -d "$SRC"
+
+          rm -rf "$SRC/__pycache__"
+          cp -a "$SRC"/. ./
+          rm -f "$ZIP"
+
+      - name: Commit unpacked files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+          else
+            git commit -m "Unpack ZAK Identity Engine v0.6"
+            git push
+          fi
