@@ -30,3 +30,13 @@ The MCP SDK must be installed. For real embedding-based PASS/REJECT checks, Insi
 ## Privacy
 
 The reference photos are bundled locally in this prototype. Do not publish the ZIP or expose an unauthenticated public server containing these photos. For a deployed version, keep references in private storage and add authentication.
+
+
+## v0.7 free-tier memory profile
+- Defaults to the smaller InsightFace `buffalo_s` model pack.
+- Detection size defaults to 320x320 (`ZAK_DET_SIZE=320`).
+- The model is lazy-loaded only when `/check_identity` is called, so `/health` can start with a low idle footprint.
+- Genuine reference embeddings and calibration are cached after first use.
+- Optional environment variables: `ZAK_FACE_MODEL=buffalo_s`, `ZAK_DET_SIZE=320`.
+
+This improves the chance of running on a 512 MB instance, but 512 MB is still a very tight limit for InsightFace + ONNX Runtime. If the first identity check still triggers an out-of-memory kill, the next free-tier strategy is to split the lightweight HTTP service from the face-matching worker or use an even smaller custom ONNX pipeline.

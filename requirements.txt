@@ -1,8 +1,7 @@
 Pillow>=10
-numpy>=1.26
-mcp
+numpy>=1.26,<3
 
-# Real identity matching (required for PASS/REVIEW/REJECT):
+# Memory-conscious real identity matching for free-tier deployment:
 insightface>=0.7.3
 onnxruntime>=1.17
 opencv-python-headless>=4.9
