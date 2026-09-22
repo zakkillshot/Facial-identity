@@ -36,6 +36,18 @@ class Handler(BaseHTTPRequestHandler):
                     "embedding_backend": "lazy",
                 },
             )
+                    elif self.path == "/self_test":
+            images = list((ROOT / "references").rglob("*.jpg"))
+            if not images:
+                return self._send(500, {"error": "no_reference_images_found"})
+
+            result = checker.check(images[0], "front")
+            self._send(200, {
+                "status": "ok",
+                "version": "0.7",
+                "model_loaded": True,
+                "result": result
+            })
         elif self.path == "/identity":
             self._send(200, {"version": "0.7", "identity": engine.config})
         else:
