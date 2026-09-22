@@ -17,7 +17,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ZIP="ZAK_Identity_Engine_v0.6.zip"
+          ZIP="ZAK_Identity_Engine_v0.7.zip"
           TMP="$(mktemp -d)"
 
           test -f "$ZIP"
