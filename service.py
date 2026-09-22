@@ -1,4 +1,4 @@
-"""ZAK Identity Engine...
+"""ZAK Identity Engine v0.7 HTTP service.
 
 The biometric model is lazy-loaded on the first identity-check request so the
 service can boot with a much smaller idle memory footprint.
@@ -6,6 +6,7 @@ service can boot with a much smaller idle memory footprint.
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlparse
 import argparse
 import json
 
@@ -27,9 +28,37 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _path(self):
+        path = urlparse(self.path).path
+
+        if path != "/":
+            path = path.rstrip("/")
+
+        return path
+
     def do_GET(self):
-        if self.path == "/health":
-            self._send(
+        path = self._path()
+
+        if path == "/":
+            return self._send(
+                200,
+                {
+                    "service": "ZAK Identity Engine",
+                    "version": "0.7",
+                    "status": "online",
+                    "embedding_backend": "lazy",
+                    "endpoints": {
+                        "health": "/health",
+                        "self_test": "/self_test",
+                        "identity": "/identity",
+                        "check_identity": "/check_identity",
+                        "build_request": "/build_request",
+                    },
+                },
+            )
+
+        if path == "/health":
+            return self._send(
                 200,
                 {
                     "service": "ZAK Identity Engine",
@@ -39,36 +68,53 @@ class Handler(BaseHTTPRequestHandler):
                 },
             )
 
-        elif self.path == "/self_test":
+        if path == "/self_test":
             try:
+                reference_dir = ROOT / "references"
+
+                if not reference_dir.exists():
+                    return self._send(
+                        500,
+                        {
+                            "status": "error",
+                            "error": "references_directory_missing",
+                            "path": str(reference_dir),
+                        },
+                    )
+
                 images = [
                     p
-                    for p in (ROOT / "references").rglob("*")
-                    if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}
+                    for p in reference_dir.rglob("*")
+                    if p.is_file()
+                    and p.suffix.lower()
+                    in {".jpg", ".jpeg", ".png", ".webp"}
                 ]
 
                 if not images:
                     return self._send(
                         500,
-                        {"error": "no_reference_images_found"},
+                        {
+                            "status": "error",
+                            "error": "no_reference_images_found",
+                        },
                     )
 
                 test_image = images[0]
                 result = checker.check(test_image, "front")
 
-                self._send(
+                return self._send(
                     200,
                     {
                         "status": "ok",
                         "version": "0.7",
-                        "model_loaded": True,
+                        "model_loaded": result.get("identity_score") is not None,
                         "test_image": test_image.name,
                         "result": result,
                     },
                 )
 
             except Exception as e:
-                self._send(
+                return self._send(
                     500,
                     {
                         "status": "error",
@@ -77,8 +123,8 @@ class Handler(BaseHTTPRequestHandler):
                     },
                 )
 
-        elif self.path == "/identity":
-            self._send(
+        if path == "/identity":
+            return self._send(
                 200,
                 {
                     "version": "0.7",
@@ -86,13 +132,16 @@ class Handler(BaseHTTPRequestHandler):
                 },
             )
 
-        else:
-            self._send(
-                404,
-                {"error": "not_found"},
-            )
+        return self._send(
+            404,
+            {
+                "error": "not_found",
+                "path": path,
+            },
+        )
 
     def do_POST(self):
+        path = self._path()
         length = int(self.headers.get("Content-Length", "0"))
 
         try:
@@ -104,7 +153,7 @@ class Handler(BaseHTTPRequestHandler):
             )
 
         try:
-            if self.path == "/check_identity":
+            if path == "/check_identity":
                 image = body.get("image_path")
 
                 if not image:
@@ -115,16 +164,19 @@ class Handler(BaseHTTPRequestHandler):
 
                 p = Path(image)
 
+                if not p.is_absolute():
+                    p = ROOT / p
+
                 if not p.exists():
                     return self._send(
                         400,
                         {
                             "error": "image_not_found",
-                            "image_path": image,
+                            "image_path": str(p),
                         },
                     )
 
-                self._send(
+                return self._send(
                     200,
                     checker.check(
                         p,
@@ -132,8 +184,8 @@ class Handler(BaseHTTPRequestHandler):
                     ),
                 )
 
-            elif self.path == "/build_request":
-                self._send(
+            if path == "/build_request":
+                return self._send(
                     200,
                     engine.build_request(
                         body.get("scene", ""),
@@ -142,14 +194,16 @@ class Handler(BaseHTTPRequestHandler):
                     ),
                 )
 
-            else:
-                self._send(
-                    404,
-                    {"error": "not_found"},
-                )
+            return self._send(
+                404,
+                {
+                    "error": "not_found",
+                    "path": path,
+                },
+            )
 
         except Exception as e:
-            self._send(
+            return self._send(
                 500,
                 {
                     "error": type(e).__name__,
