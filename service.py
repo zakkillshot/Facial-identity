@@ -36,7 +36,7 @@ class Handler(BaseHTTPRequestHandler):
                     "embedding_backend": "lazy",
                 },
             )
-                    elif self.path == "/identity":
+                  elif self.path == "/self_test"::
             images = list((ROOT / "references").rglob("*.jpg"))
             if not images:
                 return self._send(500, {"error": "no_reference_images_found"})
